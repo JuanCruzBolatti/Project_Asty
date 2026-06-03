@@ -5,6 +5,8 @@ import pandas as pd
 import logging
 import re
 
+from pandas import DataFrame
+
 logger = logging.getLogger(__name__)
 
 
@@ -116,10 +118,37 @@ class PDFExtractor:
 
             # 3) Línea que empieza con dígito (sin punto) - finalidad
             if re.match(r'^\d+\s*-', line) and not re.match(r'^\d+\.', line):
-                match = re.match(r'^(\d+\s*-\s[^0-9,]+)', line)
+
+                match = re.match(r'^(\d+\s*-\s[^0-9]+)', line)
+
                 if match:
                     current_finalidad = match.group(1).strip()
-                    current_funcion = None  # Reset función
+                    current_funcion = None
+
+                    # IMPORTANTE:
+                    # si la línea también tiene montos, parsearla
+                    if re.search(r'\d{1,3}(?:,\d{3})*(?:\.\d+)?', line):
+                        try:
+                            row = self.parse_data_line(
+                                line,
+                                current_finalidad,
+                                current_finalidad
+                            )
+
+                            if row:
+                                row_hash = (
+                                    row['finalidad'],
+                                    row['funcion'],
+                                    row['pagado']
+                                )
+
+                                if row_hash != last_row_hash:
+                                    rows.append(row)
+                                    last_row_hash = row_hash
+
+                        except Exception as e:
+                            logger.debug(f"Error parseando finalidad: {e}")
+
                 continue
 
             # 4) Línea que empieza con "-" - datos puros
@@ -148,6 +177,11 @@ class PDFExtractor:
         if line.startswith('-'):
             line = line[1:].strip()
 
+        # ELIMINAR encabezado textual
+        line = re.sub(
+            r'^\d+(?:\.\d+)*\s*-\s*[^0-9]+', '', line
+        ).strip()
+
         # Extraer todos los números (con coma o punto)
         numbers = re.findall(r'-?[\d.,]+', line)
 
@@ -167,26 +201,81 @@ class PDFExtractor:
 
         amounts = [parse_number(n) for n in numbers]
 
+        amounts = [a for a in amounts if a is not None]
+
+        n = len(amounts)
+
         # Si alguno de los primeros 4 falla, descarta
         if None in amounts[:4]:
             return None
 
-        return {
+        row = {
             "finalidad": finalidad or "N/A",
             "funcion": funcion or "N/A",
-            "credito_aprobado": amounts[0],
-            "credito_vigente": amounts[1],
-            "preventivo": amounts[2] if len(amounts) > 2 else None,
-            "compromiso": amounts[3] if len(amounts) > 3 else None,
-            "devengado": amounts[4] if len(amounts) > 4 else None,
-            "pagado": amounts[5] if len(amounts) > 5 else None,
-            "credito_disponible": amounts[6] if len(amounts) > 6 else None,
-            "credito_vig_devengado": amounts[7] if len(amounts) > 7 else None,
-            "devengado_no_pagado": amounts[8] if len(amounts) > 8 else None,
-            "modificaciones": amounts[9] if len(amounts) > 9 else None,
+            "credito_aprobado": None,
+            "modificaciones": None,
+            "credito_vigente": None,
+            "preventivo": None,
+            "compromiso": None,
+            "devengado": None,
+            "pagado": None,
+            "credito_disponible": None,
+            "credito_vig_devengado": None,
+            "devengado_no_pagado": None,
         }
 
-    def extract_spend_data(self) -> pd.DataFrame:
+        # Caso completo con "modificaciones"
+        if n == 10:
+            (
+                row["credito_aprobado"],
+                row["modificaciones"],
+                row["credito_vigente"],
+                row["preventivo"],
+                row["compromiso"],
+                row["devengado"],
+                row["pagado"],
+                row["credito_disponible"],
+                row["credito_vig_devengado"],
+                row["devengado_no_pagado"],
+            ) = amounts
+        elif n == 9:
+            (
+                row["credito_aprobado"],
+                row["credito_vigente"],
+                row["preventivo"],
+                row["compromiso"],
+                row["devengado"],
+                row["pagado"],
+                row["credito_disponible"],
+                row["credito_vig_devengado"],
+                row["devengado_no_pagado"],
+            ) = amounts
+        elif n == 8:
+            (
+                row["credito_aprobado"],
+                row["credito_vigente"],
+                row["compromiso"],
+                row["devengado"],
+                row["pagado"],
+                row["credito_disponible"],
+                row["credito_vig_devengado"],
+                row["devengado_no_pagado"],
+            ) = amounts
+        elif n == 4:
+            # TODO: Este hay que hacer algo porque no son siempre las mismas 4
+            (
+                row["credito_aprobado"],
+                row["credito_vigente"],
+                row["credito_disponible"],
+                row["credito_vig_devengado"],
+            ) = amounts
+        else:
+            logger.warning(f"Cantidad inesperada de columnas ({n}): {line}")
+            return None
+
+        return row
+
+    def extract_spend_data(self) -> tuple[DataFrame, DataFrame]:
         """
         Extrae y parsea datos de ejecución de gastos.
         """
@@ -202,7 +291,39 @@ class PDFExtractor:
 
         df = pd.DataFrame(rows)
 
+        numeric_columns = [
+            "credito_aprobado",
+            "modificaciones",
+            "credito_vigente",
+            "preventivo",
+            "compromiso",
+            "devengado",
+            "pagado",
+            "credito_disponible",
+            "credito_vig_devengado",
+            "devengado_no_pagado",
+        ]
+
+        for col in numeric_columns:
+            df[col] = pd.to_numeric(df[col], errors="coerce")
+
+        df_totals = (
+            df.groupby("finalidad")[numeric_columns]
+            .sum().reset_index()
+        )
+
+        total_final = {"finalidad": "TOTAL GENERAL"}
+
+        for col in numeric_columns:
+            total_final[col] = df[col].sum()
+
+        df_totals = pd.concat([df_totals, pd.DataFrame([total_final])], ignore_index=True)
+
+        df_totals[numeric_columns] = (
+            df_totals[numeric_columns].round(2)
+        )
+
         logger.info(f"DataFrame extraído: {df.shape[0]} filas, {df.shape[1]} columnas")
         logger.debug(f"Primeras filas:\n{df.head()}")
 
-        return df
+        return df, df_totals

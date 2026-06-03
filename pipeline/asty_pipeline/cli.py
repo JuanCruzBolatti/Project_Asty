@@ -86,12 +86,15 @@ def build_lanus(year: int, quarter: int, force_download: bool = False):
     print(f"Guardado debug: {INTERIM_DIR / 'debug_all_lines.txt'}")
 
     # Ahora parsear
-    df = extractor.extract_spend_data()
+    df, df_totals = extractor.extract_spend_data()
 
     # Guardar interim (para debug)
     interim_csv = INTERIM_DIR / f"extracted_{year}_Q{quarter}.csv"
+    totals_csv = INTERIM_DIR / f"totals_{year}_Q{quarter}.csv"
     df.to_csv(interim_csv, index=False)
+    df_totals.to_csv(totals_csv, index=False)
     logger.info(f"Interim CSV guardado: {interim_csv}")
+    logger.info(f"Totales CSV guardado: {totals_csv}")
 
     logger.info("✓ Build completado")
 

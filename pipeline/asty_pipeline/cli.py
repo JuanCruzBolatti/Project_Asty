@@ -102,28 +102,29 @@ def build_lanus(year: int, quarter: int, force_download: bool = False):
         df, year=year, quarter=quarter
     )
 
-    # df_totals["year"] = year
-    # df_totals["quarter"] = quarter
-    #
-    # df_totals["period"] = (
-    #         df_totals["year"].astype(str)
-    #         + "_Q"
-    #         + df_totals["quarter"].astype(str)
-    # )
+    df_totals["year"] = year
+    df_totals["quarter"] = quarter
+
+    df_totals["period"] = (
+            df_totals["year"].astype(str)
+            + "_Q"
+            + df_totals["quarter"].astype(str)
+    )
 
     processed_csv = (PROCESSED_DIR / f"spend_{year}_Q{quarter}.csv")
-
     processed_parquet = (PROCESSED_DIR / f"spend_{year}_Q{quarter}.parquet")
-
-    # totals_processed_csv = (PROCESSED_DIR / f"totals_{year}_Q{quarter}.csv")
+    totals_processed_csv = (PROCESSED_DIR / f"totals_{year}_Q{quarter}.csv")
+    totals_processed_parquet = (PROCESSED_DIR / f"totals_{year}_Q{quarter}.parquet")
 
     df_processed.to_csv(processed_csv, index=False)
     df_processed.to_parquet(processed_parquet, index=False)
-    # df_totals.to_csv(totals_processed_csv, index=False)
+    df_totals.to_csv(totals_processed_csv, index=False)
+    df_totals.to_parquet(totals_processed_parquet, index=False)
 
     logger.info(f"Processed CSV guardado: {processed_csv}")
     logger.info(f"Processed Parquet guardado: {processed_parquet}")
-    # logger.info(f"Processed Totals guardado: {totals_processed_csv}")
+    logger.info(f"Processed CSV Totals guardado: {totals_processed_csv}")
+    logger.info(f"Processed Parquet Totals guardado: {totals_processed_parquet}")
 
     logger.info("✓ Build completado")
 

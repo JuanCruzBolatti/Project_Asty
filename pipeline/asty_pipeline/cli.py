@@ -7,6 +7,7 @@ import pandas as pd
 import yaml
 from asty_pipeline.lanus.extract_pdf import PDFExtractor
 from asty_pipeline.lanus.download import download_pdf
+from asty_pipeline.lanus.transform import transform_spend_data
 
 # Logging
 logging.basicConfig(
@@ -95,6 +96,34 @@ def build_lanus(year: int, quarter: int, force_download: bool = False):
     df_totals.to_csv(totals_csv, index=False)
     logger.info(f"Interim CSV guardado: {interim_csv}")
     logger.info(f"Totales CSV guardado: {totals_csv}")
+
+    # Transformar datasets
+    df_processed = transform_spend_data(
+        df, year=year, quarter=quarter
+    )
+
+    # df_totals["year"] = year
+    # df_totals["quarter"] = quarter
+    #
+    # df_totals["period"] = (
+    #         df_totals["year"].astype(str)
+    #         + "_Q"
+    #         + df_totals["quarter"].astype(str)
+    # )
+
+    processed_csv = (PROCESSED_DIR / f"spend_{year}_Q{quarter}.csv")
+
+    processed_parquet = (PROCESSED_DIR / f"spend_{year}_Q{quarter}.parquet")
+
+    # totals_processed_csv = (PROCESSED_DIR / f"totals_{year}_Q{quarter}.csv")
+
+    df_processed.to_csv(processed_csv, index=False)
+    df_processed.to_parquet(processed_parquet, index=False)
+    # df_totals.to_csv(totals_processed_csv, index=False)
+
+    logger.info(f"Processed CSV guardado: {processed_csv}")
+    logger.info(f"Processed Parquet guardado: {processed_parquet}")
+    # logger.info(f"Processed Totals guardado: {totals_processed_csv}")
 
     logger.info("✓ Build completado")
 

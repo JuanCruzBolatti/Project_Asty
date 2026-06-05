@@ -1,4 +1,4 @@
-import requests
+import subprocess
 import logging
 from pathlib import Path
 
@@ -11,12 +11,12 @@ def download_pdf(
     force: bool = False
 ) -> bool:
     """
-    Download a PDF file from a URL.
+    Download a PDF file using curl.
 
     Args:
         url: PDF URL
         output_path: Destination file path
-        force: If True, download even if file exists
+        force: If True, force re-download
 
     Returns:
         True if downloaded
@@ -37,26 +37,6 @@ def download_pdf(
         exist_ok=True
     )
 
-    headers = {
-        "User-Agent": (
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-            "AppleWebKit/537.36 (KHTML, like Gecko) "
-            "Chrome/122.0.0.0 Safari/537.36"
-        ),
-        "Accept": (
-            "application/pdf,"
-            "application/octet-stream,"
-            "*/*"
-        ),
-        "Accept-Language": (
-            "en-US,en;q=0.9"
-        ),
-        "Referer": (
-            "https://www.lanus.gob.ar/"
-        ),
-        "Connection": "keep-alive",
-    }
-
     try:
 
         logger.info(
@@ -64,45 +44,35 @@ def download_pdf(
             f"{url}"
         )
 
-        session = requests.Session()
+        result = subprocess.run(
+            [
+                "curl",
+                "-L",
+                "--fail",
+                "--silent",
+                "--show-error",
 
-        session.headers.update(headers)
+                "-A",
+                (
+                    "Mozilla/5.0 "
+                    "(Windows NT 10.0; Win64; x64) "
+                    "AppleWebKit/537.36 "
+                    "(KHTML, like Gecko) "
+                    "Chrome/122.0.0.0 Safari/537.36"
+                ),
 
-        # Warm-up request
-        logger.debug(
-            "(START) performing warm-up request..."
+                "-H",
+                "Referer: https://www.lanus.gob.ar/",
+
+                "-o",
+                str(output_path),
+
+                url,
+            ],
+            check=True,
+            capture_output=True,
+            text=True,
         )
-
-        warmup_response = session.get(
-            "https://www.lanus.gob.ar/",
-            timeout=30,
-            allow_redirects=True,
-        )
-
-        warmup_response.raise_for_status()
-
-        logger.debug(
-            "(OK) warm-up request completed"
-        )
-
-        # Download PDF
-        response = session.get(
-            url,
-            timeout=60,
-            stream=True,
-            allow_redirects=True,
-        )
-
-        response.raise_for_status()
-
-        with open(output_path, "wb") as f:
-
-            for chunk in response.iter_content(
-                chunk_size=8192
-            ):
-
-                if chunk:
-                    f.write(chunk)
 
         file_size_mb = (
             output_path.stat().st_size
@@ -118,11 +88,11 @@ def download_pdf(
 
         return True
 
-    except Exception as e:
+    except subprocess.CalledProcessError as e:
 
         logger.error(
-            f"(ERROR) failed to download PDF "
-            f"from {url}: {e}"
+            f"(ERROR) curl download failed: "
+            f"{e.stderr}"
         )
 
         raise

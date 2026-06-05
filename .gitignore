@@ -61,7 +61,6 @@ dmypy.json
 .ruff_cache/
 
 # Pipeline data (temporal, se regenera)
-pipeline/data/raw/
 pipeline/data/interim/
 
 # Logs

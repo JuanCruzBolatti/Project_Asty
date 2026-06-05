@@ -48,20 +48,49 @@ def download_pdf(
             "application/octet-stream,"
             "*/*"
         ),
-        "Referer": "https://www.lanus.gob.ar/",
+        "Accept-Language": (
+            "en-US,en;q=0.9"
+        ),
+        "Referer": (
+            "https://www.lanus.gob.ar/"
+        ),
+        "Connection": "keep-alive",
     }
 
     try:
 
         logger.info(
-            f"(START) downloading PDF from: {url}"
+            f"(START) downloading PDF from: "
+            f"{url}"
         )
 
-        response = requests.get(
+        session = requests.Session()
+
+        session.headers.update(headers)
+
+        # Warm-up request
+        logger.debug(
+            "(START) performing warm-up request..."
+        )
+
+        warmup_response = session.get(
+            "https://www.lanus.gob.ar/",
+            timeout=30,
+            allow_redirects=True,
+        )
+
+        warmup_response.raise_for_status()
+
+        logger.debug(
+            "(OK) warm-up request completed"
+        )
+
+        # Download PDF
+        response = session.get(
             url,
-            headers=headers,
             timeout=60,
             stream=True,
+            allow_redirects=True,
         )
 
         response.raise_for_status()

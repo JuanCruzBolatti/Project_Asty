@@ -63,8 +63,6 @@ dmypy.json
 # Pipeline data (temporal, se regenera)
 pipeline/data/raw/
 pipeline/data/interim/
-pipeline/data/processed/*.parquet
-pipeline/data/processed/*.csv
 
 # Logs
 logs/

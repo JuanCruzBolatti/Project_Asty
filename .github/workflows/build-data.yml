@@ -1,1 +1,44 @@
-corre pipeline, regenera artefactos y commitea cambios
+name: Build Data
+
+on:
+  workflow_dispatch:
+
+  schedule:
+    - cron: "0 12 * * 1"
+
+jobs:
+
+  build-lanus:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        working-directory: pipeline
+        run: |
+          pip install -e .
+
+      - name: Build dataset
+        working-directory: pipeline
+        run: |
+          python -m asty_pipeline.cli build-lanus --year 2026 --quarter 1
+
+      - name: Commit generated datasets
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+
+          git add .
+
+          git diff --cached --quiet || git commit -m "Update generated datasets"
+
+          git push

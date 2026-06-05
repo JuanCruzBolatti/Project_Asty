@@ -11,35 +11,45 @@ logger = logging.getLogger(__name__)
 
 
 class PDFExtractor:
-    """Extrae datos de ejecución de gastos de Lanús (sin bordes de tabla)."""
+    """
+    Extract spend execution data from Lanús PDFs (without table borders).
+    """
 
     def __init__(self, pdf_path: str | Path):
         self.pdf_path = Path(pdf_path)
         if not self.pdf_path.exists():
-            raise FileNotFoundError(f"PDF no encontrado: {self.pdf_path}")
+            raise FileNotFoundError(f"PDF not found: {self.pdf_path}")
 
     def extract_text_lines(self) -> List[str]:
-        """Extrae todas las líneas de texto del PDF."""
+        """
+        Extract all text lines from the PDF.
+        """
         lines = []
         try:
             with pdfplumber.open(self.pdf_path) as pdf:
-                logger.info(f"PDF abierto: {self.pdf_path} ({len(pdf.pages)} páginas)")
+                logger.info(
+                    f"PDF opened: {self.pdf_path} "
+                    f"({len(pdf.pages)} pages)"
+                )
 
                 for page_num, page in enumerate(pdf.pages, 1):
                     text = page.extract_text()
                     if text:
                         page_lines = text.split('\n')
-                        logger.debug(f"  Página {page_num}: {len(page_lines)} líneas")
+                        logger.debug(
+                            f"Page {page_num}: "
+                            f"{len(page_lines)} lines extracted"
+                        )
                         lines.extend(page_lines)
         except Exception as e:
-            logger.error(f"Error extrayendo PDF: {e}")
+            logger.error(f"(ERROR) failed to extract PDF text: {e}")
             raise
 
         return lines
 
     def parse_spend_rows(self, lines: List[str]) -> List[dict]:
         """
-        Parsea líneas de texto y extrae filas de gasto.
+        Parse text lines and extract spend rows.
         """
         rows = []
         current_finalidad = None
@@ -52,7 +62,7 @@ class PDFExtractor:
             if not line:
                 continue
 
-            # SKIP: cabeceras y metadata
+            # Skip headers and metadata
             if any(keyword in line for keyword in [
                 "Jurisdicción",
                 "Finalidad y Función",
@@ -73,18 +83,17 @@ class PDFExtractor:
             ]):
                 continue
 
-            # SKIP: líneas que empiezan con "TOTAL"
+            # Skip lines starting with "TOTAL"
             if re.match(r'^TOTAL\s', line):
                 continue
 
-            # Estrategia: detectar por patrón del inicio
-            # 1) Línea que empieza con dígito.dígito.dígito (3 niveles) - función de 3 niveles
+            # Strategy: detect patterns from line prefix
+            # 1) Line starting with digit.digit.digit (3 levels)
             if re.match(r'^\d+\.\d+\.\d+\s*-', line):
                 match = re.match(r'^(\d+\.\d+\.\d+\s*-\s[^0-9,]+)', line)
                 if match:
                     current_funcion = match.group(1).strip()
 
-                    # Si tiene números al lado, parsear
                     if re.search(r'\d+[.,]\d+', line):
                         try:
                             row = self.parse_data_line(line, current_finalidad, current_funcion)
@@ -97,13 +106,12 @@ class PDFExtractor:
                             pass
                 continue
 
-            # 2) Línea que empieza con dígito.dígito (2 niveles) - función de 2 niveles
+            # 2) Line starting with digit.digit (2 levels)
             if re.match(r'^\d+\.\d+\s*-', line):
                 match = re.match(r'^(\d+\.\d+\s*-\s[^0-9,]+)', line)
                 if match:
                     current_funcion = match.group(1).strip()
 
-                    # Si tiene números al lado, parsear
                     if re.search(r'\d+[.,]\d+', line):
                         try:
                             row = self.parse_data_line(line, current_finalidad, current_funcion)
@@ -116,7 +124,7 @@ class PDFExtractor:
                             pass
                 continue
 
-            # 3) Línea que empieza con dígito (sin punto) - finalidad
+            # 3) Line starting with digit (without dot) - finalidad
             if re.match(r'^\d+\s*-', line) and not re.match(r'^\d+\.', line):
 
                 match = re.match(r'^(\d+\s*-\s[^0-9]+)', line)
@@ -125,8 +133,6 @@ class PDFExtractor:
                     current_finalidad = match.group(1).strip()
                     current_funcion = None
 
-                    # IMPORTANTE:
-                    # si la línea también tiene montos, parsearla
                     if re.search(r'\d{1,3}(?:,\d{3})*(?:\.\d+)?', line):
                         try:
                             row = self.parse_data_line(
@@ -151,7 +157,7 @@ class PDFExtractor:
 
                 continue
 
-            # 4) Línea que empieza con "-" - datos puros
+            # 4) Line starting with "-" - raw data
             if line.startswith('-'):
                 try:
                     funcion_to_use = current_funcion if current_funcion else current_finalidad
@@ -169,26 +175,26 @@ class PDFExtractor:
 
     def parse_data_line(self, line: str, finalidad: str, funcion: str) -> dict | None:
         """
-        Parsea una línea de datos e intenta extraer los montos.
+        Parse a data line and extract numeric amounts.
         """
         line = line.strip()
 
-        # Remover el "-" inicial si existe
+        # Remove leading "-" if present
         if line.startswith('-'):
             line = line[1:].strip()
 
-        # ELIMINAR encabezado textual
+        # Remove textual header
         line = re.sub(
             r'^\d+(?:\.\d+)*\s*-\s*[^0-9]+', '', line
         ).strip()
 
-        # Extraer todos los números (con coma o punto)
+        # Extract all numeric values
         numbers = re.findall(r'-?[\d.,]+', line)
 
-        if len(numbers) < 4:  # Reducido de 8 a 4 porque algunos datos tienen menos columnas
+        if len(numbers) < 4:
             return None
 
-        # Convertir strings a floats
+        # Convert strings to floats
         def parse_number(s):
             if s.count('.') == 1 and s.count(',') > 0:
                 s = s.replace(',', '')
@@ -205,7 +211,7 @@ class PDFExtractor:
 
         n = len(amounts)
 
-        # Si alguno de los primeros 4 falla, descarta
+        # Discard row if one of the first 4 values is invalid
         if None in amounts[:4]:
             return None
 
@@ -224,7 +230,7 @@ class PDFExtractor:
             "devengado_no_pagado": None,
         }
 
-        # Caso completo con "modificaciones"
+        # Full case with "modificaciones"
         if n == 10:
             (
                 row["credito_aprobado"],
@@ -262,7 +268,7 @@ class PDFExtractor:
                 row["devengado_no_pagado"],
             ) = amounts
         elif n == 4:
-            # TODO: Este hay que hacer algo porque no son siempre las mismas 4
+            # TODO: handle dynamic 4-column cases properly
             (
                 row["credito_aprobado"],
                 row["credito_vigente"],
@@ -270,24 +276,28 @@ class PDFExtractor:
                 row["credito_vig_devengado"],
             ) = amounts
         else:
-            logger.warning(f"Cantidad inesperada de columnas ({n}): {line}")
+            logger.warning(
+                f"Unexpected number of columns ({n}): {line}"
+            )
             return None
 
         return row
 
     def extract_spend_data(self) -> tuple[DataFrame, DataFrame]:
         """
-        Extrae y parsea datos de ejecución de gastos.
+        Extract and parse spend execution data.
         """
         lines = self.extract_text_lines()
 
         if not lines:
-            raise ValueError("No se encontró texto en el PDF")
+            raise ValueError("No text found in PDF")
 
         rows = self.parse_spend_rows(lines)
 
         if not rows:
-            raise ValueError("No se encontraron filas de datos en el PDF")
+            raise ValueError(
+                "No data rows found in PDF"
+            )
 
         df = pd.DataFrame(rows)
 
@@ -323,7 +333,11 @@ class PDFExtractor:
             df_totals[numeric_columns].round(2)
         )
 
-        logger.info(f"DataFrame extraído: {df.shape[0]} filas, {df.shape[1]} columnas")
-        logger.debug(f"Primeras filas:\n{df.head()}")
+        logger.info(
+            f"(OK) dataframe extracted successfully: "
+            f"{df.shape[0]} rows, {df.shape[1]} columns"
+        )
+
+        logger.debug(f"Dataframe preview:\n{df.head()}")
 
         return df, df_totals

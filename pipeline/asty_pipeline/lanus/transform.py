@@ -22,16 +22,16 @@ def transform_spend_data(
     quarter: int
 ) -> pd.DataFrame:
     """
-    Limpia y normaliza dataset de gastos.
+    Clean and normalize spend dataset.
     """
 
     df = df.copy()
 
-    # Metadata temporal
+    # Temporal metadata
     df["year"] = year
     df["quarter"] = quarter
 
-    # Separar códigos y nombres
+    # Split codes and names
     df["finalidad_code"] = (
         df["finalidad"]
         .str.extract(r'^(\d+)')[0]
@@ -54,7 +54,7 @@ def transform_spend_data(
         .str.strip()
     )
 
-    # Convertir columnas numéricas
+    # Convert numeric columns
     for col in NUMERIC_COLUMNS:
         if col in df.columns:
             df[col] = pd.to_numeric(
@@ -62,7 +62,7 @@ def transform_spend_data(
                 errors="coerce"
             ).round(2)
 
-    # IDs útiles
+    # Generate useful IDs
     df["period"] = (
         df["year"].astype(str)
         + "_Q"
@@ -75,7 +75,7 @@ def transform_spend_data(
         + df["funcion_code"].fillna("unknown")
     )
 
-    # Orden de columnas
+    # Define column order
     ordered_columns = [
         "row_id",
         "year",

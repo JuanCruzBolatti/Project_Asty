@@ -7,24 +7,24 @@ logger = logging.getLogger(__name__)
 
 def download_pdf(url: str, output_path: Path, force: bool = False) -> bool:
     """
-    Descarga un PDF desde una URL.
+    Download a PDF file from a URL.
 
     Args:
-        url: URL del PDF
-        output_path: Dónde guardarlo
-        force: Si True, descarga aunque ya exista
+        url: PDF URL
+        output_path: Destination file path
+        force: If True, download even if the file already exists
 
     Returns:
-        True si se descargó, False si ya existía
+        True if the file was downloaded, False if it already existed
     """
     if output_path.exists() and not force:
-        logger.info(f"PDF ya existe: {output_path}")
+        logger.info(f"(OK) PDF already exists: {output_path}")
         return False
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     try:
-        logger.info(f"Descargando: {url}")
+        logger.info(f"(START) downloading PDF from URL: {url}")
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
         }
@@ -34,9 +34,12 @@ def download_pdf(url: str, output_path: Path, force: bool = False) -> bool:
         with open(output_path, 'wb') as f:
             f.write(response.content)
 
-        logger.info(f"✓ Descargado: {output_path} ({len(response.content) / 1024 / 1024:.2f} MB)")
+        logger.info(
+            f"(OK) PDF downloaded successfully: {output_path} "
+            f"({len(response.content) / 1024 / 1024:.2f} MB)"
+        )
         return True
 
     except Exception as e:
-        logger.error(f"Error descargando {url}: {e}")
+        logger.error(f"(ERROR) failed to download PDF from {url}: {e}")
         raise

@@ -32,8 +32,7 @@ jobs:
 
           python -m asty_pipeline.cli build-lanus \
             --year 2026 \
-            --quarter 1 \
-            --skip-download
+            --quarter 1
 
       - name: Commit generated files
         run: |

@@ -213,6 +213,16 @@ def build_lanus(
             / f"meta_{year}_Q{quarter}.json"
     )
 
+    logger.info(
+        f"(DEBUG) spend json path: "
+        f"{spend_json_path}"
+    )
+
+    logger.info(
+        f"(DEBUG) totals json path: "
+        f"{totals_json_path}"
+    )
+
     export_spend_json(
         df_processed,
         spend_json_path

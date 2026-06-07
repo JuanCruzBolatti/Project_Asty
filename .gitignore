@@ -1,89 +1,105 @@
-# Node (Next.js en apps/web)
+```gitignore
+# =========================================================
+# Node / Next.js
+# =========================================================
+
 node_modules/
+.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
 .next/
 out/
 build/
 dist/
+
+coverage/
+
 *.tsbuildinfo
-.env.local
-.env.*.local
+next-env.d.ts
+
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+
 .pnpm-store/
 .turbo/
-.DS_Store
 
-# Python (pipeline)
+.vercel/
+
+# =========================================================
+# Environment
+# =========================================================
+
+.env
+.env.*
+!.env.example
+
+# =========================================================
+# Python
+# =========================================================
+
 __pycache__/
 *.py[cod]
 *$py.class
-*.so
+
 .Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-pip-wheel-metadata/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
+
 .venv/
 venv/
-ENV/
 env/
-.env
-.vscode/
-*.swp
-*.swo
-*~
-.idea/
-*.iml
-.ipynb_checkpoints/
+ENV/
+
 .pytest_cache/
+.ipynb_checkpoints/
+.mypy_cache/
+.ruff_cache/
+.pyre/
+
 .coverage
 htmlcov/
-*.mypy_cache/
-.dmypy.json
-dmypy.json
-.pyre/
-.ruff_cache/
 
-# Pipeline data (temporal, se regenera)
+*.egg-info/
+.eggs/
+
+# =========================================================
+# Pipeline data
+# =========================================================
+
+pipeline/data/raw/
 pipeline/data/interim/
 
-# Logs
-logs/
-*.log
-
-# OS
-.DS_Store
-.AppleDouble
-.LSOverride
-Thumbs.db
-
+# =========================================================
 # IDEs
-.vscode/
+# =========================================================
+
 .idea/
+.vscode/
+
+*.iml
 *.swp
 *.swo
 *~
-*.sublime-project
-*.sublime-workspace
 
+# =========================================================
+# OS
+# =========================================================
+
+.DS_Store
+Thumbs.db
+.AppleDouble
+.LSOverride
+
+# =========================================================
 # Misc
-.env
-.env.local
-.env.*.local
+# =========================================================
+
+logs/
+*.log
 *.pem
+```

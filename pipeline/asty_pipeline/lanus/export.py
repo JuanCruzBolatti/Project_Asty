@@ -19,7 +19,13 @@ def export_spend_json(
 
     logger.info("(START) exporting spend JSON...")
 
-    records = df.to_dict(orient="records")
+    records = (
+        df
+        .replace([float("inf"), float("-inf")], None)
+        .astype(object)
+        .where(pd.notnull(df), None)
+        .to_dict(orient="records")
+    )
 
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(
@@ -44,7 +50,13 @@ def export_totals_json(
 
     logger.info("(START) exporting totals JSON...")
 
-    records = df_totals.to_dict(orient="records")
+    records = (
+        df_totals
+        .replace([float("inf"), float("-inf")], None)
+        .astype(object)
+        .where(pd.notnull(df_totals), None)
+        .to_dict(orient="records")
+    )
 
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(

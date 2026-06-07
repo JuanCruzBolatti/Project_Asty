@@ -1,9 +1,25 @@
-import { SpendRow } from "./types"
+import fs from "fs/promises"
+import path from "path"
 
-export async function loadSpendData(): Promise<SpendRow[]> {
-  const response = await fetch(
-    "http://localhost:3000/data/lanus/spend_2026_Q1.json"
+import { SpendRow } from "@/lib/lanus/types"
+
+export async function getSpendData(
+  year: number,
+  quarter: number
+): Promise<SpendRow[]> {
+
+  const filePath = path.join(
+    process.cwd(),
+    "public",
+    "data",
+    "lanus",
+    `spend_${year}_Q${quarter}.json`
   )
 
-  return response.json()
+  const fileContents = await fs.readFile(
+    filePath,
+    "utf-8"
+  )
+
+  return JSON.parse(fileContents)
 }

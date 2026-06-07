@@ -213,12 +213,12 @@ def build_lanus(
             / f"meta_{year}_Q{quarter}.json"
     )
 
-    logger.info(
+    logger.debug(
         f"(DEBUG) spend json path: "
         f"{spend_json_path}"
     )
 
-    logger.info(
+    logger.debug(
         f"(DEBUG) totals json path: "
         f"{totals_json_path}"
     )

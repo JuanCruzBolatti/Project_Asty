@@ -1,5 +1,10 @@
 import type { Metadata } from "next";
 
+export const metadata: Metadata = {
+  title: "Asty",
+  description: "Municipal spending explorer",
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -7,9 +12,9 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="es"
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body>{children}</body>
     </html>
   );
 }

@@ -1,4 +1,13 @@
 import type { Metadata } from "next";
+import { JetBrains_Mono } from "next/font/google";
+
+import "./globals.css";
+
+import { Navbar } from "@/components/layout/Navbar"
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+});
 
 export const metadata: Metadata = {
   title: "Asty",
@@ -14,7 +23,11 @@ export default function RootLayout({
     <html
       lang="es"
     >
-      <body>{children}</body>
+      <body className={`${jetbrainsMono.className}`}>
+        <Navbar />
+
+        {children}
+      </body>
     </html>
   );
 }

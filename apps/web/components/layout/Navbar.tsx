@@ -1,20 +1,25 @@
+import Link from "next/link";
+
 export function Navbar() {
     return (
-        <nav className="fixed top-0 left-0 z-50 w-full p-6">
+        <nav className="fixed top-0 left-0 z-50 w-full px-5 py-4">
 
-            <div className="relative w-full md:w-fit">
+            <div className="flex items-end gap-2">
 
-                <h1 className="text-2xl font-semibold tracking-tight">
-                    Asty
-                </h1>
+                <Link href="/" className="text-lg leading-none">
+                    asty.
+                </Link>
 
                 <div
                     className="
-                        absolute -bottom-2 left-[20%]
-                        h-px
-                        w-60 md:w-8
-                        bg-white
-                      "
+                        mb-[3px]
+                        h-[2px]
+                        flex-1
+                        bg-[#f2efff]
+
+                        md:flex-none
+                        md:w-32
+                    "
                 />
 
             </div>

@@ -1,4 +1,5 @@
 import { getSpendData } from "@/lib/lanus/data"
+import Link from "next/link"
 
 export default async function HomePage() {
     const data = await getSpendData(2026, 1)
@@ -28,10 +29,29 @@ export default async function HomePage() {
 
             </div>
 
-            {/* PAGE CONTENT */}
+            {/* HERO */}
+            <section className="relative z-20 mt-20">
+                <div className="bg-green flex flex-col justify-center items-center w-70 mx-auto">
+
+                    <h1 className="w-full">lanús</h1>
+
+                    <div className="bg-violet w-full">
+                        <Link href="/">flecha</Link>
+                        <h2>RECAP</h2>
+                    </div>
+
+                    <div className="bg-bordeaux w-full">
+                        <p>gastos de la muni pero con onda</p>
+                        <Link href="/">ver recap flecha</Link>
+                    </div>
+
+                </div>
+            </section>
+
+            {/* PAGE TEST CONTENT */}
             <div className="relative z-10">
 
-                <section className="min-h-screen">
+                <section className="min-h-screen mt-50">
                     <h1>Asty</h1>
 
                     <div className="text-green">

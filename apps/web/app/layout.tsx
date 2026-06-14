@@ -7,6 +7,7 @@ import { Navbar } from "@/components/layout/Navbar"
 
 const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
+  style: ["normal", "italic"],
 });
 
 export const metadata: Metadata = {

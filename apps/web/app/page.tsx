@@ -13,9 +13,9 @@ export default async function HomePage() {
                 {/* Glow */}
                 <div className="absolute -top-40 -left-40 w-[500px] h-[500px] rounded-full bg-violet opacity-90 blur-[160px]" />
 
-                <div className="absolute top-10 -right-30 w-[600px] h-[600px] rounded-full bg-violet blur-[150px]" />
+                <div className="absolute top-10 -right-30 md:w-[600px] md:h-[600px] rounded-full bg-violet blur-[150px]" />
 
-                <div className="absolute top-[80vh] -right-20 w-[300px] h-[300px] rounded-full bg-green blur-[140px]" />
+                <div className="absolute top-[80vh] -right-40 md:-right-20 w-[300px] h-[300px] rounded-full bg-bordeaux md:bg-green blur-[140px]" />
 
                 {/* Noise overlay */}
                 <div
@@ -30,19 +30,22 @@ export default async function HomePage() {
             </div>
 
             {/* HERO */}
-            <section className="relative z-20 mt-20">
-                <div className="bg-green flex flex-col justify-center items-center w-70 mx-auto">
+            <section className="relative z-20 mt-[35vh] md:mt-[25vh]">
+                <div className="flex flex-col justify-center items-center w-90 mx-auto md:w-fit">
 
-                    <h1 className="w-full">lanús</h1>
+                    <h1 className="w-full italic text-6xl md:text-8xl leading-none">lanús</h1>
 
-                    <div className="bg-violet w-full">
-                        <Link href="/">flecha</Link>
-                        <h2>RECAP</h2>
+                    <div className="w-full flex flex-row gap-2 items-start">
+                        <Link href="/" className="rounded-4xl bg-violet flex items-center justify-center w-fit px-4 py-2 mt-2 h-[5rem] md:mt-6 md:h-[8.8rem] md:px-6">
+                            V
+                        </Link>
+
+                        <h2 className="text-[6.2rem] leading-[0.9] font-extrabold md:text-[12rem]">RECAP</h2>
                     </div>
 
-                    <div className="bg-bordeaux w-full">
-                        <p>gastos de la muni pero con onda</p>
-                        <Link href="/">ver recap flecha</Link>
+                    <div className="w-full flex flex-col gap-1 items-end">
+                        <p className="w-full text-[4.6vw] italic leading-[0.9] md:text-muted md:hover:text-soft transition duration-300 ease-out">gastos de la muni pero con onda</p>
+                        <Link href="/" className="bg-violet px-5 py-2 rounded-4xl text-xl">ver recap --</Link>
                     </div>
 
                 </div>

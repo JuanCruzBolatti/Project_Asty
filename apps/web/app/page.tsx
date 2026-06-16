@@ -1,5 +1,6 @@
 import { getSpendData } from "@/lib/lanus/data"
 import Link from "next/link"
+import { linkPrimary } from "@/lib/utils/utils"
 
 export default async function HomePage() {
     const data = await getSpendData(2026, 1)
@@ -31,21 +32,21 @@ export default async function HomePage() {
 
             {/* HERO */}
             <section className="relative z-20 mt-[35vh] md:mt-[25vh]">
-                <div className="flex flex-col justify-center items-center w-90 mx-auto md:w-fit">
+                <div className="flex flex-col justify-center items-center w-[90%] mx-auto md:w-fit">
 
                     <h1 className="w-full italic text-6xl md:text-8xl leading-none">lanús</h1>
 
                     <div className="w-full flex flex-row gap-2 items-start">
-                        <Link href="/" className="rounded-4xl bg-violet flex items-center justify-center w-fit px-4 py-2 mt-2 h-[5rem] md:mt-6 md:h-[8.8rem] md:px-6">
+                        <Link href="/" className={`${linkPrimary} flex items-center justify-center w-fit px-4 py-2 mt-[1vw] h-[20vw] md:mt-3 md:h-[9rem] md:px-6`}>
                             V
                         </Link>
 
-                        <h2 className="text-[6.2rem] leading-[0.9] font-extrabold md:text-[12rem]">RECAP</h2>
+                        <h2 className="text-[25vw] leading-[0.9] font-extrabold md:text-[12rem]">RECAP</h2>
                     </div>
 
                     <div className="w-full flex flex-col gap-1 items-end">
-                        <p className="w-full text-[4.6vw] italic leading-[0.9] md:text-muted md:hover:text-soft transition duration-300 ease-out">gastos de la muni pero con onda</p>
-                        <Link href="/" className="bg-violet px-5 py-2 rounded-4xl text-xl">ver recap --</Link>
+                        <p className="w-full text-[4.6vw] italic leading-[0.9]">gastos de la muni pero con onda</p>
+                        <Link href="/" className={`${linkPrimary} px-5 py-2 text-xl mr-1 mt-1 md:text-2xl md:px-7 md:py-3`}>ver recap --</Link>
                     </div>
 
                 </div>

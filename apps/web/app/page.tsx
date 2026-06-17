@@ -1,6 +1,8 @@
 import { getSpendData } from "@/lib/lanus/data"
 import Link from "next/link"
 import { linkPrimary } from "@/lib/utils/utils"
+import { BackgroundGlow } from "@/components/ui/background-glow"
+import { HOME_GLOWS } from "@/lib/theme/glows"
 
 export default async function HomePage() {
     const data = await getSpendData(2026, 1)
@@ -9,26 +11,7 @@ export default async function HomePage() {
         <main className="relative overflow-x-hidden">
 
             {/* Hero and Background Glow */}
-            <div className="absolute inset-0 pointer-events-none">
-
-                {/* Glow */}
-                <div className="absolute -top-40 -left-40 w-[500px] h-[500px] rounded-full bg-violet opacity-90 blur-[160px]" />
-
-                <div className="absolute top-10 -right-30 md:w-[600px] md:h-[600px] rounded-full bg-violet blur-[150px]" />
-
-                <div className="absolute top-[80vh] -right-40 md:-right-20 w-[300px] h-[300px] rounded-full bg-bordeaux md:bg-green blur-[140px]" />
-
-                {/* Noise overlay */}
-                <div
-                    className="
-                      absolute inset-0
-                      bg-[url('/images/white-noise.png')]
-                      opacity-60
-                      mix-blend-soft-light
-                    "
-                />
-
-            </div>
+            <BackgroundGlow glows={HOME_GLOWS} />
 
             {/* HERO */}
             <section className="relative z-20 mt-[35vh] md:mt-[25vh]">
@@ -37,7 +20,7 @@ export default async function HomePage() {
                     <h1 className="w-full italic text-6xl md:text-8xl leading-none">lanús</h1>
 
                     <div className="w-full flex flex-row gap-2 items-start">
-                        <Link href="/" className={`${linkPrimary} flex items-center justify-center w-fit px-4 py-2 mt-[1vw] h-[20vw] md:mt-3 md:h-[9rem] md:px-6`}>
+                        <Link href="/recap/2026/q1" className={`${linkPrimary} flex items-center justify-center w-fit px-4 py-2 mt-[1vw] h-[20vw] md:mt-3 md:h-[9rem] md:px-6`}>
                             V
                         </Link>
 

@@ -83,6 +83,18 @@ export default function HomePage() {
 
             </section>
 
+            {/* PAGE TEST CONTENT */}
+
+            <section className="min-h-screen mt-50">
+                <h1>Data</h1>
+
+                <div className="text-green">
+                    hola
+                </div>
+
+            </section>
+
+
         </main>
     )
 }

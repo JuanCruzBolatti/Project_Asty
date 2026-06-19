@@ -16,7 +16,7 @@ export function BackgroundGlow({
                                    children,
                                }: BackgroundGlowProps) {
     return (
-        <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
 
             {glows.map((glow, index) => (
                 <div
